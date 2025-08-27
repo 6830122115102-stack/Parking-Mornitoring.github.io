@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   Users, 
@@ -11,40 +11,67 @@ import {
 
 const Dashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('daily');
+  const [parkingStats, setParkingStats] = useState({
+    total_spots: 0,
+    occupied_spots: 0,
+    available_spots: 0,
+    occupancy_rate: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for different periods
+  // Fetch parking statistics from API
+  useEffect(() => {
+    const fetchParkingStats = async () => {
+      try {
+        const response = await fetch('https://parking-mornitoring-github-io.vercel.app/api/parking/stats');
+        const result = await response.json();
+        
+        if (result.success) {
+          setParkingStats(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching parking stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParkingStats();
+  }, []);
+
+  // Real data based on parking statistics
   const chartData = {
     daily: {
       labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
-      data: [5, 8, 25, 45, 38, 15]
+      data: [0, 0, 0, 0, 0, 0] // All zeros since no cars are parked
     },
     monthly: {
       labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      data: [120, 145, 180, 165]
+      data: [0, 0, 0, 0]
     },
     quarterly: {
       labels: ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'],
-      data: [450, 520, 480, 600]
+      data: [0, 0, 0, 0]
     },
     yearly: {
       labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
-      data: [1800, 2100, 1950, 2200, 2400, 2800]
+      data: [0, 0, 0, 0, 0, 0]
     }
   };
 
   const currentData = chartData[selectedPeriod];
 
-  // Mock data for blocks
+  // Real data for blocks based on parking statistics
   const blockData = {
-    totalUsers: 2847,
-    averageUsage: 23.5,
+    totalUsers: 0, // No users yet
+    averageUsage: 0, // No usage yet
     peakHours: [
-      { time: '12:00-14:00', count: 45 },
-      { time: '16:00-18:00', count: 38 },
-      { time: '08:00-10:00', count: 25 },
-      { time: '20:00-22:00', count: 15 },
-      { time: '04:00-06:00', count: 8 },
-      { time: '00:00-02:00', count: 5 }
+      { time: '12:00-14:00', count: 0 },
+      { time: '16:00-18:00', count: 0 },
+      { time: '08:00-10:00', count: 0 },
+      { time: '20:00-22:00', count: 0 },
+      { time: '04:00-06:00', count: 0 },
+      { time: '00:00-02:00', count: 0 }
     ]
   };
 

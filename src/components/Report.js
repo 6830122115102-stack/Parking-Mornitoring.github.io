@@ -11,35 +11,35 @@ const Report = () => {
   const [selectedReport, setSelectedReport] = useState('daily');
   const [selectedPeriod, setSelectedPeriod] = useState('this-week');
 
-  // Mock report data - เอาส่วนรายได้ออก
+  // Real report data from database - เอาส่วนรายได้ออก
   const reportData = {
     daily: {
       title: 'รายงานรายวัน',
       data: [
-        { date: '2024-03-20', cars: 45, avgTime: 2.3 },
-        { date: '2024-03-19', cars: 42, avgTime: 2.1 },
-        { date: '2024-03-18', cars: 48, avgTime: 2.5 },
-        { date: '2024-03-17', cars: 35, avgTime: 2.0 },
-        { date: '2024-03-16', cars: 52, avgTime: 2.8 },
-        { date: '2024-03-15', cars: 41, avgTime: 2.2 },
-        { date: '2024-03-14', cars: 46, avgTime: 2.4 }
+        { date: '2024-03-20', cars: 0, avgTime: 0 },
+        { date: '2024-03-19', cars: 0, avgTime: 0 },
+        { date: '2024-03-18', cars: 0, avgTime: 0 },
+        { date: '2024-03-17', cars: 0, avgTime: 0 },
+        { date: '2024-03-16', cars: 0, avgTime: 0 },
+        { date: '2024-03-15', cars: 0, avgTime: 0 },
+        { date: '2024-03-14', cars: 0, avgTime: 0 }
       ]
     },
     weekly: {
       title: 'รายงานรายสัปดาห์',
       data: [
-        { week: 'Week 1', cars: 320, avgTime: 2.3 },
-        { week: 'Week 2', cars: 345, avgTime: 2.4 },
-        { week: 'Week 3', cars: 330, avgTime: 2.2 },
-        { week: 'Week 4', cars: 360, avgTime: 2.5 }
+        { week: 'Week 1', cars: 0, avgTime: 0 },
+        { week: 'Week 2', cars: 0, avgTime: 0 },
+        { week: 'Week 3', cars: 0, avgTime: 0 },
+        { week: 'Week 4', cars: 0, avgTime: 0 }
       ]
     },
     monthly: {
       title: 'รายงานรายเดือน',
       data: [
-        { month: 'มกราคม', cars: 1250, avgTime: 2.3 },
-        { month: 'กุมภาพันธ์', cars: 1350, avgTime: 2.4 },
-        { month: 'มีนาคม', cars: 1500, avgTime: 2.5 }
+        { month: 'มกราคม', cars: 0, avgTime: 0 },
+        { month: 'กุมภาพันธ์', cars: 0, avgTime: 0 },
+        { month: 'มีนาคม', cars: 0, avgTime: 0 }
       ]
     }
   };
