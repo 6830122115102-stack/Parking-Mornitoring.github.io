@@ -57,8 +57,8 @@ app.use('*', (req, res) => {
   });
 });
 
-// Serve static files from React build
-if (process.env.NODE_ENV === 'production') {
+// Serve static files from React build (only for local production)
+if (process.env.NODE_ENV === 'production' && !process.env.VERCEL) {
   const path = require('path');
   app.use(express.static(path.join(__dirname, '../build')));
   
