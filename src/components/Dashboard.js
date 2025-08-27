@@ -211,28 +211,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Additional Stats */}
-      <div className="bg-white rounded-lg p-6 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">สถิติเพิ่มเติม</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-2xl font-bold text-blue-600">85%</p>
-            <p className="text-sm text-gray-600">อัตราการใช้งานเฉลี่ย</p>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <p className="text-2xl font-bold text-green-600">4.2</p>
-            <p className="text-sm text-gray-600">คะแนนความพึงพอใจ</p>
-          </div>
-          <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <p className="text-2xl font-bold text-orange-600">12:30</p>
-            <p className="text-sm text-gray-600">เวลาที่มีผู้ใช้สูงสุด</p>
-          </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <p className="text-2xl font-bold text-purple-600">2.3</p>
-            <p className="text-sm text-gray-600">ชั่วโมง/การใช้งานเฉลี่ย</p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
