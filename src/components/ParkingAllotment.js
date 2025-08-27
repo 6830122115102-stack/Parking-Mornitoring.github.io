@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ParkingSpot from './ParkingSpot';
 
 const ParkingAllotment = () => {
@@ -50,6 +50,45 @@ const ParkingAllotment = () => {
     ],
   });
 
+  // Fetch parking spots from API
+  useEffect(() => {
+    const fetchParkingSpots = async () => {
+      try {
+        const response = await fetch('https://parking-mornitoring-github-io.vercel.app/api/parking/spots');
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          // Convert API data to our format
+          const newParkingSpots = {
+            A: [], B: [], C: [], D: []
+          };
+          
+          result.data.forEach(spot => {
+            const section = spot.spot_id.charAt(0);
+            if (newParkingSpots[section]) {
+              newParkingSpots[section].push({
+                id: spot.spot_id,
+                status: spot.status,
+                layout: 'id-left'
+              });
+            }
+          });
+          
+          setParkingSpots(newParkingSpots);
+        }
+      } catch (error) {
+        console.error('Error fetching parking spots:', error);
+      }
+    };
+
+    fetchParkingSpots();
+    
+    // Auto-refresh every 3 seconds
+    const interval = setInterval(fetchParkingSpots, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   const handleContextMenu = (e, spot) => {
     e.preventDefault();
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
@@ -57,14 +96,37 @@ const ParkingAllotment = () => {
     setShowContextMenu(true);
   };
 
-  const handleStatusChange = (newStatus) => {
+  const handleStatusChange = async (newStatus) => {
     if (contextMenuSpot) {
-      setParkingSpots(prev => ({
-        ...prev,
-        [contextMenuSpot.id.charAt(0)]: prev[contextMenuSpot.id.charAt(0)].map(spot =>
-          spot.id === contextMenuSpot.id ? { ...spot, status: newStatus } : spot
-        )
-      }));
+      try {
+        // Update status in database
+        const response = await fetch(`https://parking-mornitoring-github-io.vercel.app/api/parking/spots/${contextMenuSpot.id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            status: newStatus,
+            user_id: 'admin' // Default user ID for manual changes
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          // Update local state
+          setParkingSpots(prev => ({
+            ...prev,
+            [contextMenuSpot.id.charAt(0)]: prev[contextMenuSpot.id.charAt(0)].map(spot =>
+              spot.id === contextMenuSpot.id ? { ...spot, status: newStatus } : spot
+            )
+          }));
+        } else {
+          console.error('Failed to update status:', result.error);
+        }
+      } catch (error) {
+        console.error('Error updating status:', error);
+      }
     }
     setShowContextMenu(false);
   };
