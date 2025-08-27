@@ -2,57 +2,29 @@ const express = require('express');
 const router = express.Router();
 const { supabase, supabaseAdmin } = require('../config/supabase');
 
-// Mock data for parking spots
-const mockParkingSpots = [
-  // Section A
-  { id: 1, spot_id: 'A01', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 2, spot_id: 'A02', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 3, spot_id: 'A03', section: 'A', status: 'occupied', occupied_by: 'user123', occupied_at: new Date().toISOString(), released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 4, spot_id: 'A04', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 5, spot_id: 'A05', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 6, spot_id: 'A06', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 7, spot_id: 'A07', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 8, spot_id: 'A08', section: 'A', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  
-  // Section B
-  { id: 9, spot_id: 'B01', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 10, spot_id: 'B02', section: 'B', status: 'occupied', occupied_by: 'user456', occupied_at: new Date().toISOString(), released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 11, spot_id: 'B03', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 12, spot_id: 'B04', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 13, spot_id: 'B05', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 14, spot_id: 'B06', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 15, spot_id: 'B07', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 16, spot_id: 'B08', section: 'B', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  
-  // Section C
-  { id: 17, spot_id: 'C01', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 18, spot_id: 'C02', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 19, spot_id: 'C03', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 20, spot_id: 'C04', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 21, spot_id: 'C05', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 22, spot_id: 'C06', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 23, spot_id: 'C07', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 24, spot_id: 'C08', section: 'C', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  
-  // Section D
-  { id: 25, spot_id: 'D01', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 26, spot_id: 'D02', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 27, spot_id: 'D03', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 28, spot_id: 'D04', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 29, spot_id: 'D05', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 30, spot_id: 'D06', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 31, spot_id: 'D07', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 32, spot_id: 'D08', section: 'D', status: 'available', occupied_by: null, occupied_at: null, released_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-];
+// Parking spots routes using Supabase database
 
 // GET /api/parking/spots - Get all parking spots
 router.get('/spots', async (req, res) => {
   try {
-    // Use mock data instead of Supabase
+    const { data, error } = await supabase
+      .from('parking_spots')
+      .select('*')
+      .order('spot_id');
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to fetch parking spots from database',
+        message: error.message
+      });
+    }
+
     res.json({
       success: true,
-      data: mockParkingSpots,
-      count: mockParkingSpots.length
+      data: data || [],
+      count: data ? data.length : 0
     });
   } catch (error) {
     console.error('Error fetching parking spots:', error);
@@ -69,18 +41,30 @@ router.get('/spots/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    const spot = mockParkingSpots.find(s => s.spot_id === id);
-    
-    if (!spot) {
-      return res.status(404).json({
+    const { data, error } = await supabase
+      .from('parking_spots')
+      .select('*')
+      .eq('spot_id', id)
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          error: 'Parking spot not found'
+        });
+      }
+      return res.status(500).json({
         success: false,
-        error: 'Parking spot not found'
+        error: 'Failed to fetch parking spot from database',
+        message: error.message
       });
     }
 
     res.json({
       success: true,
-      data: spot
+      data: data
     });
   } catch (error) {
     console.error('Error fetching parking spot:', error);
@@ -105,30 +89,57 @@ router.put('/spots/:id/status', async (req, res) => {
       });
     }
 
-    const spotIndex = mockParkingSpots.findIndex(s => s.spot_id === id);
-    
-    if (spotIndex === -1) {
-      return res.status(404).json({
+    // Prepare update data
+    const updateData = {
+      status: status,
+      updated_at: new Date().toISOString()
+    };
+
+    if (status === 'occupied') {
+      updateData.occupied_by = user_id;
+      updateData.occupied_at = new Date().toISOString();
+      updateData.released_at = null;
+    } else {
+      updateData.occupied_by = null;
+      updateData.released_at = new Date().toISOString();
+    }
+
+    // Update in Supabase
+    const { data, error } = await supabase
+      .from('parking_spots')
+      .update(updateData)
+      .eq('spot_id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          error: 'Parking spot not found'
+        });
+      }
+      return res.status(500).json({
         success: false,
-        error: 'Parking spot not found'
+        error: 'Failed to update parking spot in database',
+        message: error.message
       });
     }
 
-    // Update spot
-    mockParkingSpots[spotIndex].status = status;
-    mockParkingSpots[spotIndex].updated_at = new Date().toISOString();
-
-    if (status === 'occupied') {
-      mockParkingSpots[spotIndex].occupied_by = user_id;
-      mockParkingSpots[spotIndex].occupied_at = new Date().toISOString();
-    } else {
-      mockParkingSpots[spotIndex].occupied_by = null;
-      mockParkingSpots[spotIndex].released_at = new Date().toISOString();
-    }
+    // Log to parking history
+    await supabase
+      .from('parking_history')
+      .insert({
+        spot_id: id,
+        user_id: user_id,
+        action: status === 'occupied' ? 'occupy' : 'release',
+        timestamp: new Date().toISOString()
+      });
 
     res.json({
       success: true,
-      data: mockParkingSpots[spotIndex],
+      data: data,
       message: `Parking spot ${id} status updated to ${status}`
     });
   } catch (error) {
@@ -144,10 +155,39 @@ router.put('/spots/:id/status', async (req, res) => {
 // GET /api/parking/stats - Get parking statistics
 router.get('/stats', async (req, res) => {
   try {
-    const totalSpots = mockParkingSpots.length;
-    const occupiedSpots = mockParkingSpots.filter(spot => spot.status === 'occupied').length;
+    // Get total spots
+    const { data: totalData, error: totalError } = await supabase
+      .from('parking_spots')
+      .select('id', { count: 'exact' });
+
+    if (totalError) {
+      console.error('Supabase error:', totalError);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to fetch parking statistics from database',
+        message: totalError.message
+      });
+    }
+
+    // Get occupied spots
+    const { data: occupiedData, error: occupiedError } = await supabase
+      .from('parking_spots')
+      .select('id', { count: 'exact' })
+      .eq('status', 'occupied');
+
+    if (occupiedError) {
+      console.error('Supabase error:', occupiedError);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to fetch parking statistics from database',
+        message: occupiedError.message
+      });
+    }
+
+    const totalSpots = totalData?.length || 0;
+    const occupiedSpots = occupiedData?.length || 0;
     const availableSpots = totalSpots - occupiedSpots;
-    const occupancyRate = ((occupiedSpots / totalSpots) * 100).toFixed(1);
+    const occupancyRate = totalSpots > 0 ? ((occupiedSpots / totalSpots) * 100).toFixed(1) : '0.0';
 
     res.json({
       success: true,
