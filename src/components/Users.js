@@ -3,8 +3,6 @@ import {
   Users as UsersIcon, 
   UserPlus, 
   Search, 
-  Filter,
-  MoreVertical,
   Edit,
   Trash2,
   Eye

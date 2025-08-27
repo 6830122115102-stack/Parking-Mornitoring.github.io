@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  FileText, 
   Download, 
-  Calendar,
   BarChart3,
   Car,
   Clock,

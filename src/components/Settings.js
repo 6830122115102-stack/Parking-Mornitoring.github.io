@@ -6,9 +6,6 @@ import {
   Shield,
   Monitor,
   Database,
-  Palette,
-  Globe,
-  Clock,
   DollarSign
 } from 'lucide-react';
 
