@@ -56,15 +56,15 @@ ALTER TABLE reports ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to parking spots" ON parking_spots
   FOR SELECT USING (true);
 
-CREATE POLICY "Allow authenticated users to update parking spots" ON parking_spots
-  FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow public update access to parking spots" ON parking_spots
+  FOR UPDATE USING (true);
 
 -- Create RLS policies for parking_history
 CREATE POLICY "Allow public read access to parking history" ON parking_history
   FOR SELECT USING (true);
 
-CREATE POLICY "Allow authenticated users to insert parking history" ON parking_history
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Allow public insert access to parking history" ON parking_history
+  FOR INSERT WITH CHECK (true);
 
 -- Create RLS policies for reports
 CREATE POLICY "Allow public read access to reports" ON reports

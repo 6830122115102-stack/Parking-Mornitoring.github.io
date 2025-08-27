@@ -99,6 +99,16 @@ const ParkingAllotment = () => {
   const handleStatusChange = async (newStatus) => {
     if (contextMenuSpot) {
       try {
+        console.log(`Updating ${contextMenuSpot.id} to ${newStatus}...`);
+        
+        // Update local state immediately for better UX
+        setParkingSpots(prev => ({
+          ...prev,
+          [contextMenuSpot.id.charAt(0)]: prev[contextMenuSpot.id.charAt(0)].map(spot =>
+            spot.id === contextMenuSpot.id ? { ...spot, status: newStatus } : spot
+          )
+        }));
+        
         // Update status in database using spot_id
         const response = await fetch(`https://parking-mornitoring-github-io.vercel.app/api/parking/spots/${contextMenuSpot.id}/status`, {
           method: 'PUT',
@@ -114,14 +124,6 @@ const ParkingAllotment = () => {
         const result = await response.json();
         
         if (result.success) {
-          // Update local state immediately for better UX
-          setParkingSpots(prev => ({
-            ...prev,
-            [contextMenuSpot.id.charAt(0)]: prev[contextMenuSpot.id.charAt(0)].map(spot =>
-              spot.id === contextMenuSpot.id ? { ...spot, status: newStatus } : spot
-            )
-          }));
-          
           console.log(`Successfully updated ${contextMenuSpot.id} to ${newStatus}`);
         } else {
           console.error('Failed to update status:', result.error);
