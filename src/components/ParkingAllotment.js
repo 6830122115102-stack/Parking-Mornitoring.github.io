@@ -5,6 +5,7 @@ const ParkingAllotment = () => {
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [contextMenuSpot, setContextMenuSpot] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // สร้าง parking grid ใหม่ - เริ่มต้นทุก block เป็น Available และใช้ layout เดียวกัน
   const [parkingSpots, setParkingSpots] = useState({
@@ -52,6 +53,12 @@ const ParkingAllotment = () => {
 
   // Fetch parking spots from API
   const fetchParkingSpots = async () => {
+    // Don't fetch if currently updating
+    if (isUpdating) {
+      console.log('Skipping fetch - currently updating...');
+      return;
+    }
+    
     try {
       const response = await fetch('https://parking-mornitoring-github-io.vercel.app/api/parking/spots');
       const result = await response.json();
@@ -83,8 +90,8 @@ const ParkingAllotment = () => {
   useEffect(() => {
     fetchParkingSpots();
     
-    // Auto-refresh every 3 seconds
-    const interval = setInterval(fetchParkingSpots, 3000);
+    // Auto-refresh every 10 seconds (less frequent to avoid conflicts)
+    const interval = setInterval(fetchParkingSpots, 10000);
     
     return () => clearInterval(interval);
   }, []);
@@ -97,9 +104,14 @@ const ParkingAllotment = () => {
   };
 
   const handleStatusChange = async (newStatus) => {
-    if (contextMenuSpot) {
+    if (contextMenuSpot && !isUpdating) {
+      setIsUpdating(true);
+      
       try {
         console.log(`Updating ${contextMenuSpot.id} to ${newStatus}...`);
+        
+        // Store original status for rollback
+        const originalStatus = contextMenuSpot.status;
         
         // Update local state immediately for better UX
         setParkingSpots(prev => ({
@@ -125,19 +137,28 @@ const ParkingAllotment = () => {
         
         if (result.success) {
           console.log(`Successfully updated ${contextMenuSpot.id} to ${newStatus}`);
+          // Don't fetch again - keep the optimistic update
         } else {
           console.error('Failed to update status:', result.error);
           // Revert local state if API call failed
-          setTimeout(() => {
-            fetchParkingSpots();
-          }, 1000);
+          setParkingSpots(prev => ({
+            ...prev,
+            [contextMenuSpot.id.charAt(0)]: prev[contextMenuSpot.id.charAt(0)].map(spot =>
+              spot.id === contextMenuSpot.id ? { ...spot, status: originalStatus } : spot
+            )
+          }));
         }
       } catch (error) {
         console.error('Error updating status:', error);
         // Revert local state if API call failed
-        setTimeout(() => {
-          fetchParkingSpots();
-        }, 1000);
+        setParkingSpots(prev => ({
+          ...prev,
+          [contextMenuSpot.id.charAt(0)]: prev[contextMenuSpot.id.charAt(0)].map(spot =>
+            spot.id === contextMenuSpot.id ? { ...spot, status: contextMenuSpot.status } : spot
+          )
+        }));
+      } finally {
+        setIsUpdating(false);
       }
     }
     setShowContextMenu(false);
