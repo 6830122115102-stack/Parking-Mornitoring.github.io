@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: './config.env' });
+require('dotenv').config({ path: './backend/config.env' });
 
 // Supabase configuration
 const supabaseUrl = process.env.SUPABASE_URL;

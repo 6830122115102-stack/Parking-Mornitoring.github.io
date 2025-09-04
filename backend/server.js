@@ -27,7 +27,8 @@ app.use(cors({
       'https://parking-mornitoring-github-io.vercel.app',
       'https://parking-mornitoring-github-hfsnn4uxq-golfs-projects-ada858e6.vercel.app',
       'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app',
-      'https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app'
+      'https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app',
+      'https://parking-mornitoring-github-1kpe5ukmu-golfs-projects-ada858e6.vercel.app'
     ];
     
     // Check if origin is in allowed list or is a Vercel app
