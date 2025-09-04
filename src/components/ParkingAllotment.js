@@ -210,6 +210,9 @@ const ParkingAllotment = () => {
           
           // Show success message
           console.log(`Parking spot ${spotId} status updated to ${newStatus} and saved to database`);
+          
+          // Clear any previous errors
+          setError(null);
         } else {
           console.error('Failed to update status:', result.error);
           // Revert local state if API call failed
@@ -219,7 +222,15 @@ const ParkingAllotment = () => {
               spot.id === spotId ? { ...spot, status: originalStatus } : spot
             )
           }));
-          setError(`Failed to update ${spotId}: ${result.error}`);
+          
+          // Show user-friendly error message
+          let errorMessage = `ไม่สามารถอัปเดต ${spotId}`;
+          if (result.message) {
+            errorMessage += `: ${result.message}`;
+          } else if (result.error) {
+            errorMessage += `: ${result.error}`;
+          }
+          setError(errorMessage);
         }
       } catch (error) {
         console.error('Error updating status:', error);

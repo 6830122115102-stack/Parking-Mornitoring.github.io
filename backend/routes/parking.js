@@ -82,6 +82,14 @@ router.put('/spots/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status, user_id } = req.body;
 
+    console.log(`🔄 Updating parking spot ${id} to status: ${status}`);
+    console.log('Request body:', req.body);
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseAnonKey: !!process.env.SUPABASE_ANON_KEY,
+      hasSupabaseServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    });
+
     if (!status || !['available', 'occupied'].includes(status)) {
       return res.status(400).json({
         success: false,
@@ -104,8 +112,9 @@ router.put('/spots/:id/status', async (req, res) => {
       updateData.released_at = new Date().toISOString();
     }
 
-    // Update in Supabase
-    const { data, error } = await supabase
+    // Update in Supabase using admin client
+    console.log('Update data:', updateData);
+    const { data, error } = await supabaseAdmin
       .from('parking_spots')
       .update(updateData)
       .eq('spot_id', id)
@@ -113,22 +122,50 @@ router.put('/spots/:id/status', async (req, res) => {
       .single();
 
     if (error) {
-      console.error('Supabase error:', error);
+      console.error('❌ Supabase error:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      
       if (error.code === 'PGRST116') {
         return res.status(404).json({
           success: false,
           error: 'Parking spot not found'
         });
       }
+      
+      // Check for common Supabase errors
+      if (error.message && error.message.includes('fetch failed')) {
+        return res.status(503).json({
+          success: false,
+          error: 'Database connection failed',
+          message: 'ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง'
+        });
+      }
+      
+      if (error.code === '42501') {
+        return res.status(403).json({
+          success: false,
+          error: 'Permission denied',
+          message: 'ไม่มีสิทธิ์ในการอัปเดตข้อมูล'
+        });
+      }
+      
       return res.status(500).json({
         success: false,
         error: 'Failed to update parking spot in database',
-        message: error.message
+        message: error.message,
+        details: error.details
       });
     }
 
-    // Log to parking history
-    await supabase
+    console.log('✅ Successfully updated parking spot:', data);
+
+    // Log to parking history using admin client
+    await supabaseAdmin
       .from('parking_history')
       .insert({
         spot_id: id,
