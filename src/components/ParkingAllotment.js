@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ParkingSpot from './ParkingSpot';
+import { useParkingAPI } from '../hooks/useParkingAPI';
 
 const ParkingAllotment = () => {
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -12,58 +13,26 @@ const ParkingAllotment = () => {
   
   // เก็บ reference สำหรับ spots ที่กำลังอัปเดต
   const updatingSpots = useRef(new Set());
+  
+  // Use parking API hook
+  const { 
+    getParkingSpots, 
+    updateParkingSpotStatus,
+    clearError 
+  } = useParkingAPI();
 
   // สร้าง parking grid เริ่มต้น - จะถูกแทนที่ด้วยข้อมูลจากฐานข้อมูล
   const [parkingSpots, setParkingSpots] = useState({
     A: [], B: [], C: [], D: []
   });
 
-  // Fetch parking spots from API
-  const fetchParkingSpots = async (forceRefresh = false) => {
-    // Don't fetch if currently updating specific spots (unless forced)
-    if (isUpdating && !forceRefresh) {
-      console.log('Skipping fetch - currently updating...');
-      return;
-    }
+  // Load parking spots from API
+  const loadParkingSpots = async () => {
+    setIsLoading(true);
+    setError(null);
     
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Try multiple API endpoints in case of deployment changes
-      const apiEndpoints = [
-        'https://parking-mornitoring-github-io.vercel.app/api/parking/spots',
-        'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots',
-        'https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app/api/parking/spots',
-        'https://parking-mornitoring-github-1kpe5ukmu-golfs-projects-ada858e6.vercel.app/api/parking/spots'
-      ];
-      
-      let response;
-      let lastError;
-      
-      for (const endpoint of apiEndpoints) {
-        try {
-          console.log(`Trying API endpoint: ${endpoint}`);
-          response = await fetch(endpoint);
-          
-          if (response.ok) {
-            console.log(`✅ Successfully connected to: ${endpoint}`);
-            break;
-          } else {
-            console.log(`❌ Failed to connect to: ${endpoint} (${response.status})`);
-            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-        } catch (error) {
-          console.log(`❌ Network error for: ${endpoint}`, error.message);
-          lastError = error;
-        }
-      }
-      
-      if (!response || !response.ok) {
-        throw lastError || new Error('All API endpoints failed');
-      }
-      
-      const result = await response.json();
+      const result = await getParkingSpots();
       
       if (result.success && result.data) {
         // Convert API data to our format
@@ -93,80 +62,73 @@ const ParkingAllotment = () => {
         
         setParkingSpots(newParkingSpots);
         setLastFetchTime(new Date());
-        console.log('Parking spots loaded from database:', newParkingSpots);
+        console.log('✅ Parking spots loaded from API:', newParkingSpots);
       } else {
         throw new Error(result.error || 'Failed to fetch parking spots');
       }
-    } catch (error) {
-      console.error('Error fetching parking spots:', error);
-      setError(`ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้: ${error.message}`);
+    } catch (err) {
+      console.error('❌ Error loading parking spots:', err);
+      setError(`ไม่สามารถโหลดข้อมูลได้: ${err.message}`);
       
-      // Fallback to default data if API fails
-      const fallbackSpots = {
-        A: [
-          { id: 'A01', status: 'available', layout: 'id-left' },
-          { id: 'A02', status: 'available', layout: 'id-left' },
-          { id: 'A03', status: 'available', layout: 'id-left' },
-          { id: 'A04', status: 'available', layout: 'id-left' },
-          { id: 'A05', status: 'available', layout: 'id-left' },
-          { id: 'A06', status: 'available', layout: 'id-left' },
-          { id: 'A07', status: 'available', layout: 'id-left' },
-          { id: 'A08', status: 'available', layout: 'id-left' },
-        ],
-        B: [
-          { id: 'B01', status: 'available', layout: 'id-left' },
-          { id: 'B02', status: 'available', layout: 'id-left' },
-          { id: 'B03', status: 'available', layout: 'id-left' },
-          { id: 'B04', status: 'available', layout: 'id-left' },
-          { id: 'B05', status: 'available', layout: 'id-left' },
-          { id: 'B06', status: 'available', layout: 'id-left' },
-          { id: 'B07', status: 'available', layout: 'id-left' },
-          { id: 'B08', status: 'available', layout: 'id-left' },
-        ],
-        C: [
-          { id: 'C01', status: 'available', layout: 'id-left' },
-          { id: 'C02', status: 'available', layout: 'id-left' },
-          { id: 'C03', status: 'available', layout: 'id-left' },
-          { id: 'C04', status: 'available', layout: 'id-left' },
-          { id: 'C05', status: 'available', layout: 'id-left' },
-          { id: 'C06', status: 'available', layout: 'id-left' },
-          { id: 'C07', status: 'available', layout: 'id-left' },
-          { id: 'C08', status: 'available', layout: 'id-left' },
-        ],
-        D: [
-          { id: 'D01', status: 'available', layout: 'id-left' },
-          { id: 'D02', status: 'available', layout: 'id-left' },
-          { id: 'D03', status: 'available', layout: 'id-left' },
-          { id: 'D04', status: 'available', layout: 'id-left' },
-          { id: 'D05', status: 'available', layout: 'id-left' },
-          { id: 'D06', status: 'available', layout: 'id-left' },
-          { id: 'D07', status: 'available', layout: 'id-left' },
-          { id: 'D08', status: 'available', layout: 'id-left' },
-        ],
-      };
-      
-      setParkingSpots(fallbackSpots);
-      console.log('Using fallback data due to API error');
+      // Fallback to default data
+      initializeDefaultSpots();
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Initialize with default data as fallback
+  const initializeDefaultSpots = () => {
+    const defaultSpots = {
+      A: [
+        { id: 'A01', status: 'available', layout: 'id-left' },
+        { id: 'A02', status: 'available', layout: 'id-left' },
+        { id: 'A03', status: 'available', layout: 'id-left' },
+        { id: 'A04', status: 'available', layout: 'id-left' },
+        { id: 'A05', status: 'available', layout: 'id-left' },
+        { id: 'A06', status: 'available', layout: 'id-left' },
+        { id: 'A07', status: 'available', layout: 'id-left' },
+        { id: 'A08', status: 'available', layout: 'id-left' },
+      ],
+      B: [
+        { id: 'B01', status: 'available', layout: 'id-left' },
+        { id: 'B02', status: 'available', layout: 'id-left' },
+        { id: 'B03', status: 'available', layout: 'id-left' },
+        { id: 'B04', status: 'available', layout: 'id-left' },
+        { id: 'B05', status: 'available', layout: 'id-left' },
+        { id: 'B06', status: 'available', layout: 'id-left' },
+        { id: 'B07', status: 'available', layout: 'id-left' },
+        { id: 'B08', status: 'available', layout: 'id-left' },
+      ],
+      C: [
+        { id: 'C01', status: 'available', layout: 'id-left' },
+        { id: 'C02', status: 'available', layout: 'id-left' },
+        { id: 'C03', status: 'available', layout: 'id-left' },
+        { id: 'C04', status: 'available', layout: 'id-left' },
+        { id: 'C05', status: 'available', layout: 'id-left' },
+        { id: 'C06', status: 'available', layout: 'id-left' },
+        { id: 'C07', status: 'available', layout: 'id-left' },
+        { id: 'C08', status: 'available', layout: 'id-left' },
+      ],
+      D: [
+        { id: 'D01', status: 'available', layout: 'id-left' },
+        { id: 'D02', status: 'available', layout: 'id-left' },
+        { id: 'D03', status: 'available', layout: 'id-left' },
+        { id: 'D04', status: 'available', layout: 'id-left' },
+        { id: 'D05', status: 'available', layout: 'id-left' },
+        { id: 'D06', status: 'available', layout: 'id-left' },
+        { id: 'D07', status: 'available', layout: 'id-left' },
+        { id: 'D08', status: 'available', layout: 'id-left' },
+      ],
+    };
+    
+    setParkingSpots(defaultSpots);
+    console.log('📋 Using default parking spots data');
+  };
+
   useEffect(() => {
-    // Load initial data from database
-    fetchParkingSpots(true);
-    
-    // Auto-refresh every 15 seconds (less frequent to avoid conflicts)
-    const interval = setInterval(() => {
-      // Only refresh if no spots are currently being updated
-      if (updatingSpots.current.size === 0) {
-        fetchParkingSpots();
-      } else {
-        console.log('Skipping auto-refresh - spots are being updated');
-      }
-    }, 15000);
-    
-    return () => clearInterval(interval);
+    // Load parking spots from API
+    loadParkingSpots();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleContextMenu = (e, spot) => {
@@ -186,12 +148,12 @@ const ParkingAllotment = () => {
       setIsUpdating(true);
       
       try {
-        console.log(`Updating ${spotId} to ${newStatus}...`);
+        console.log(`🔄 Updating ${spotId} to ${newStatus}...`);
         
-        // Store original status for rollback
-        const originalStatus = contextMenuSpot.status;
+        // Store original status for rollback (unused but kept for future use)
+        // const originalStatus = contextMenuSpot.status;
         
-        // Update local state immediately for better UX (optimistic update)
+        // Update local state immediately (optimistic update)
         setParkingSpots(prev => ({
           ...prev,
           [section]: prev[section].map(spot =>
@@ -203,54 +165,13 @@ const ParkingAllotment = () => {
           )
         }));
         
-        // Update status in database using spot_id
-        const updateEndpoints = [
-          `https://parking-mornitoring-github-io.vercel.app/api/parking/spots/${spotId}/status`,
-          `https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`,
-          `https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`,
-          `https://parking-mornitoring-github-1kpe5ukmu-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`
-        ];
-        
-        let response;
-        let lastError;
-        
-        for (const endpoint of updateEndpoints) {
-          try {
-            console.log(`Trying update endpoint: ${endpoint}`);
-            response = await fetch(endpoint, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                status: newStatus,
-                user_id: 'admin' // Default user ID for manual changes
-              })
-            });
-            
-            if (response.ok) {
-              console.log(`✅ Successfully updated via: ${endpoint}`);
-              break;
-            } else {
-              console.log(`❌ Failed to update via: ${endpoint} (${response.status})`);
-              lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-          } catch (error) {
-            console.log(`❌ Network error for update: ${endpoint}`, error.message);
-            lastError = error;
-          }
-        }
-        
-        if (!response || !response.ok) {
-          throw lastError || new Error('All update endpoints failed');
-        }
-
-        const result = await response.json();
+        // Update via API
+        const result = await updateParkingSpotStatus(spotId, newStatus);
         
         if (result.success) {
-          console.log(`Successfully updated ${spotId} to ${newStatus}`);
+          console.log(`✅ Successfully updated ${spotId} to ${newStatus}`);
           
-          // Update local state with the actual data from database
+          // Update with actual data from API
           setParkingSpots(prev => ({
             ...prev,
             [section]: prev[section].map(spot =>
@@ -265,40 +186,24 @@ const ParkingAllotment = () => {
             )
           }));
           
-          // Show success message
-          console.log(`Parking spot ${spotId} status updated to ${newStatus} and saved to database`);
-          
-          // Clear any previous errors
           setError(null);
+          clearError();
         } else {
-          console.error('Failed to update status:', result.error);
-          // Revert local state if API call failed
-          setParkingSpots(prev => ({
-            ...prev,
-            [section]: prev[section].map(spot =>
-              spot.id === spotId ? { ...spot, status: originalStatus } : spot
-            )
-          }));
-          
-          // Show user-friendly error message
-          let errorMessage = `ไม่สามารถอัปเดต ${spotId}`;
-          if (result.message) {
-            errorMessage += `: ${result.message}`;
-          } else if (result.error) {
-            errorMessage += `: ${result.error}`;
-          }
-          setError(errorMessage);
+          throw new Error(result.error || 'Failed to update status');
         }
+        
       } catch (error) {
-        console.error('Error updating status:', error);
-        // Revert local state if API call failed
+        console.error('❌ Error updating status:', error);
+        
+        // Revert local state
         setParkingSpots(prev => ({
           ...prev,
           [section]: prev[section].map(spot =>
             spot.id === spotId ? { ...spot, status: contextMenuSpot.status } : spot
           )
         }));
-        setError(`Error updating ${spotId}: ${error.message}`);
+        
+        setError(`ไม่สามารถอัปเดต ${spotId}: ${error.message}`);
       } finally {
         // Remove this spot from updating set
         updatingSpots.current.delete(spotId);
@@ -314,7 +219,7 @@ const ParkingAllotment = () => {
 
   // Function to refresh data manually
   const handleRefresh = () => {
-    fetchParkingSpots(true);
+    loadParkingSpots();
   };
 
   return (

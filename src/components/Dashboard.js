@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParkingAPI } from '../hooks/useParkingAPI';
 import { 
   BarChart3, 
   Users, 
@@ -17,22 +18,20 @@ const Dashboard = () => {
     available_spots: 0,
     occupancy_rate: 0
   });
-  const [loading, setLoading] = useState(true);
+  // Use parking API hook
+  const { getParkingStats } = useParkingAPI();
 
   // Fetch parking statistics from API
   useEffect(() => {
     const fetchParkingStats = async () => {
       try {
-        const response = await fetch('https://parking-mornitoring-github-io.vercel.app/api/parking/stats');
-        const result = await response.json();
+        const result = await getParkingStats();
         
         if (result.success) {
           setParkingStats(result.data);
         }
       } catch (error) {
         console.error('Error fetching parking stats:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -44,7 +43,7 @@ const Dashboard = () => {
 
     // Cleanup interval on component unmount
     return () => clearInterval(interval);
-  }, []);
+  }, [getParkingStats]);
 
   // Real data based on parking statistics from database
   const chartData = {
