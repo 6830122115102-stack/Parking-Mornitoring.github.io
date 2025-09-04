@@ -15,17 +15,33 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://parking-system-monitor.vercel.app',
-    'https://parking-system-monitor-git-main.vercel.app',
-    'https://parking-system-monitor-*.vercel.app',
-    'https://parking-mornitoring-github-io.vercel.app',
-    'https://parking-mornitoring-github-hfsnn4uxq-golfs-projects-ada858e6.vercel.app',
-    'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app',
-    'https://*.vercel.app'
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // List of allowed origins
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://parking-system-monitor.vercel.app',
+      'https://parking-system-monitor-git-main.vercel.app',
+      'https://parking-mornitoring-github-io.vercel.app',
+      'https://parking-mornitoring-github-hfsnn4uxq-golfs-projects-ada858e6.vercel.app',
+      'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app',
+      'https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app'
+    ];
+    
+    // Check if origin is in allowed list or is a Vercel app
+    if (allowedOrigins.includes(origin) || origin.includes('.vercel.app')) {
+      console.log(`✅ CORS allowed for origin: ${origin}`);
+      return callback(null, true);
+    }
+    
+    console.log(`❌ CORS blocked for origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'), false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

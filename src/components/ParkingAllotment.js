@@ -33,7 +33,8 @@ const ParkingAllotment = () => {
       // Try multiple API endpoints in case of deployment changes
       const apiEndpoints = [
         'https://parking-mornitoring-github-io.vercel.app/api/parking/spots',
-        'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots'
+        'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots',
+        'https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app/api/parking/spots'
       ];
       
       let response;
@@ -204,7 +205,8 @@ const ParkingAllotment = () => {
         // Update status in database using spot_id
         const updateEndpoints = [
           `https://parking-mornitoring-github-io.vercel.app/api/parking/spots/${spotId}/status`,
-          `https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`
+          `https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`,
+          `https://parking-mornitoring-github-6yq2s85c3-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`
         ];
         
         let response;
