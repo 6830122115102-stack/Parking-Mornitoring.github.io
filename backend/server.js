@@ -19,7 +19,10 @@ app.use(cors({
     'http://localhost:3000',
     'https://parking-system-monitor.vercel.app',
     'https://parking-system-monitor-git-main.vercel.app',
-    'https://parking-system-monitor-*.vercel.app'
+    'https://parking-system-monitor-*.vercel.app',
+    'https://parking-mornitoring-github-io.vercel.app',
+    'https://parking-mornitoring-github-hfsnn4uxq-golfs-projects-ada858e6.vercel.app',
+    'https://*.vercel.app'
   ],
   credentials: true
 }));

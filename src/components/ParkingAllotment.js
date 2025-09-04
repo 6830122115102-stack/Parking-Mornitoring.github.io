@@ -31,6 +31,11 @@ const ParkingAllotment = () => {
       setError(null);
       
       const response = await fetch('https://parking-mornitoring-github-io.vercel.app/api/parking/spots');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       const result = await response.json();
       
       if (result.success && result.data) {
@@ -67,7 +72,54 @@ const ParkingAllotment = () => {
       }
     } catch (error) {
       console.error('Error fetching parking spots:', error);
-      setError(error.message);
+      setError(`ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้: ${error.message}`);
+      
+      // Fallback to default data if API fails
+      const fallbackSpots = {
+        A: [
+          { id: 'A01', status: 'available', layout: 'id-left' },
+          { id: 'A02', status: 'available', layout: 'id-left' },
+          { id: 'A03', status: 'available', layout: 'id-left' },
+          { id: 'A04', status: 'available', layout: 'id-left' },
+          { id: 'A05', status: 'available', layout: 'id-left' },
+          { id: 'A06', status: 'available', layout: 'id-left' },
+          { id: 'A07', status: 'available', layout: 'id-left' },
+          { id: 'A08', status: 'available', layout: 'id-left' },
+        ],
+        B: [
+          { id: 'B01', status: 'available', layout: 'id-left' },
+          { id: 'B02', status: 'available', layout: 'id-left' },
+          { id: 'B03', status: 'available', layout: 'id-left' },
+          { id: 'B04', status: 'available', layout: 'id-left' },
+          { id: 'B05', status: 'available', layout: 'id-left' },
+          { id: 'B06', status: 'available', layout: 'id-left' },
+          { id: 'B07', status: 'available', layout: 'id-left' },
+          { id: 'B08', status: 'available', layout: 'id-left' },
+        ],
+        C: [
+          { id: 'C01', status: 'available', layout: 'id-left' },
+          { id: 'C02', status: 'available', layout: 'id-left' },
+          { id: 'C03', status: 'available', layout: 'id-left' },
+          { id: 'C04', status: 'available', layout: 'id-left' },
+          { id: 'C05', status: 'available', layout: 'id-left' },
+          { id: 'C06', status: 'available', layout: 'id-left' },
+          { id: 'C07', status: 'available', layout: 'id-left' },
+          { id: 'C08', status: 'available', layout: 'id-left' },
+        ],
+        D: [
+          { id: 'D01', status: 'available', layout: 'id-left' },
+          { id: 'D02', status: 'available', layout: 'id-left' },
+          { id: 'D03', status: 'available', layout: 'id-left' },
+          { id: 'D04', status: 'available', layout: 'id-left' },
+          { id: 'D05', status: 'available', layout: 'id-left' },
+          { id: 'D06', status: 'available', layout: 'id-left' },
+          { id: 'D07', status: 'available', layout: 'id-left' },
+          { id: 'D08', status: 'available', layout: 'id-left' },
+        ],
+      };
+      
+      setParkingSpots(fallbackSpots);
+      console.log('Using fallback data due to API error');
     } finally {
       setIsLoading(false);
     }
