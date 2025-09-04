@@ -30,10 +30,35 @@ const ParkingAllotment = () => {
       setIsLoading(true);
       setError(null);
       
-      const response = await fetch('https://parking-mornitoring-github-io.vercel.app/api/parking/spots');
+      // Try multiple API endpoints in case of deployment changes
+      const apiEndpoints = [
+        'https://parking-mornitoring-github-io.vercel.app/api/parking/spots',
+        'https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots'
+      ];
       
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      let response;
+      let lastError;
+      
+      for (const endpoint of apiEndpoints) {
+        try {
+          console.log(`Trying API endpoint: ${endpoint}`);
+          response = await fetch(endpoint);
+          
+          if (response.ok) {
+            console.log(`✅ Successfully connected to: ${endpoint}`);
+            break;
+          } else {
+            console.log(`❌ Failed to connect to: ${endpoint} (${response.status})`);
+            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+        } catch (error) {
+          console.log(`❌ Network error for: ${endpoint}`, error.message);
+          lastError = error;
+        }
+      }
+      
+      if (!response || !response.ok) {
+        throw lastError || new Error('All API endpoints failed');
       }
       
       const result = await response.json();
@@ -177,16 +202,44 @@ const ParkingAllotment = () => {
         }));
         
         // Update status in database using spot_id
-        const response = await fetch(`https://parking-mornitoring-github-io.vercel.app/api/parking/spots/${spotId}/status`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            status: newStatus,
-            user_id: 'admin' // Default user ID for manual changes
-          })
-        });
+        const updateEndpoints = [
+          `https://parking-mornitoring-github-io.vercel.app/api/parking/spots/${spotId}/status`,
+          `https://parking-mornitoring-github-ex4epk3mh-golfs-projects-ada858e6.vercel.app/api/parking/spots/${spotId}/status`
+        ];
+        
+        let response;
+        let lastError;
+        
+        for (const endpoint of updateEndpoints) {
+          try {
+            console.log(`Trying update endpoint: ${endpoint}`);
+            response = await fetch(endpoint, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                status: newStatus,
+                user_id: 'admin' // Default user ID for manual changes
+              })
+            });
+            
+            if (response.ok) {
+              console.log(`✅ Successfully updated via: ${endpoint}`);
+              break;
+            } else {
+              console.log(`❌ Failed to update via: ${endpoint} (${response.status})`);
+              lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+          } catch (error) {
+            console.log(`❌ Network error for update: ${endpoint}`, error.message);
+            lastError = error;
+          }
+        }
+        
+        if (!response || !response.ok) {
+          throw lastError || new Error('All update endpoints failed');
+        }
 
         const result = await response.json();
         
