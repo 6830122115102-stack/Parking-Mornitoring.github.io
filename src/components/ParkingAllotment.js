@@ -88,7 +88,7 @@ const ParkingAllotment = () => {
     }, 15000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleContextMenu = (e, spot) => {
     e.preventDefault();
